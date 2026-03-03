@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Job } from '@/types'
 import { timeAgo, formatTaka, formatBDT } from '@/lib/utils'
@@ -22,6 +22,20 @@ export default function JobsClient({ jobs }: { jobs: Job[] }) {
   const [appliedIds, setAppliedIds] = useState<string[]>([])
   const [savedIds, setSavedIds] = useState<string[]>([])
   const [toast, setToast] = useState({ visible: false, msg: '', icon: '✅' })
+
+  // Load existing applications and saved jobs from DB so status persists after refresh
+  useEffect(() => {
+    if (!user || role !== 'model') return
+    const load = async () => {
+      const [{ data: apps }, { data: saved }] = await Promise.all([
+        supabase.from('applications').select('job_id').eq('model_id', user.id),
+        supabase.from('saved_jobs').select('job_id').eq('model_id', user.id),
+      ])
+      if (apps) setAppliedIds(apps.map((a: any) => a.job_id))
+      if (saved) setSavedIds(saved.map((s: any) => s.job_id))
+    }
+    load()
+  }, [user, role])
 
   const toggleType = (t: string) =>
     setTypeFilter(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t])

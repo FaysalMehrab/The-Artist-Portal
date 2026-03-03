@@ -4,11 +4,17 @@ import ProfileClientModel from './ProfileClientModel'
 
 export const revalidate = 0
 
-export default async function ModelProfilePage({ params }: { params: { id: string } }) {
+export default async function ModelProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+
   const { data: model } = await supabase
     .from('models')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!model) notFound()

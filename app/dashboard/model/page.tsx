@@ -56,15 +56,22 @@ export default function ModelDashboard() {
   }, [modelProfile])
 
   useEffect(() => {
+    if (user) {
+      fetchApplications()
+      fetchSavedJobs()
+    }
+  }, [user])
+
+  useEffect(() => {
     if (tab === 'applications' && user) fetchApplications()
     if (tab === 'saved' && user) fetchSavedJobs()
-  }, [tab, user])
+  }, [tab])
 
   const fetchApplications = async () => {
     setDataLoading(true)
     const { data } = await supabase
       .from('applications')
-      .select('*, jobs(title, pay, location, type, shoot_date, agency_profiles(agency_name))')
+      .select('*, jobs(title, pay_amount, pay_display, location, type, shoot_date, agency_profiles(agency_name))')
       .eq('model_id', user!.id)
       .order('created_at', { ascending: false })
     setApplications(data || [])
@@ -197,18 +204,20 @@ export default function ModelDashboard() {
             <div>
               <p className="text-[11px] tracking-[2px] uppercase font-bold text-[#c9a84c] mb-4">Profile Photo</p>
               <div className="flex flex-col items-center gap-1">
+                {user && (
                 <PhotoUpload
-                  userId={user!.id}
+                  userId={user.id}
                   currentUrl={form.photo_url}
                   bucket="avatars"
                   shape="circle"
                   label="Upload Photo"
                   onUpload={async (url) => {
                     setForm(f => ({ ...f, photo_url: url }))
-                    await supabase.from('models').update({ photo_url: url }).eq('id', user!.id)
+                    await supabase.from('models').update({ photo_url: url }).eq('id', user.id)
                     await refreshProfile()
                   }}
                 />
+                )}
               </div>
             </div>
 
@@ -284,14 +293,16 @@ export default function ModelDashboard() {
             <div className="border-t border-white/6 pt-5">
               <p className="text-[11px] tracking-[2px] uppercase font-bold text-[#c9a84c] mb-3">Portfolio Photos</p>
               <p className="text-xs text-white/35 mb-4">Add up to 8 photos. These will be visible on your public profile.</p>
+              {user && (
               <PortfolioUpload
-                userId={user!.id}
+                userId={user.id}
                 existingUrls={(modelProfile as any)?.portfolio_urls || []}
                 onUpdate={async (urls) => {
-                  await supabase.from('models').update({ portfolio_urls: urls }).eq('id', user!.id)
+                  await supabase.from('models').update({ portfolio_urls: urls }).eq('id', user.id)
                   await refreshProfile()
                 }}
               />
+              )}
             </div>
 
             {/* View Profile link */}
@@ -333,7 +344,7 @@ export default function ModelDashboard() {
                         </span>
                       </div>
                       <div className="flex gap-3 flex-wrap">
-                        {job?.pay && <span className="text-xs text-[#c9a84c] bg-[#c9a84c]/10 border border-[#c9a84c]/20 px-3 py-1 rounded-full">{formatTaka(job.pay)}</span>}
+                        {(job?.pay_amount || job?.pay_display) && <span className="text-xs text-[#c9a84c] bg-[#c9a84c]/10 border border-[#c9a84c]/20 px-3 py-1 rounded-full">{job.pay_amount ? formatBDT(job.pay_amount) : job.pay_display}</span>}
                         {job?.type && <span className="text-xs text-white/40 bg-white/5 border border-white/10 px-3 py-1 rounded-full">{job.type}</span>}
                         {job?.shoot_date && <span className="text-xs text-white/40">📅 {new Date(job.shoot_date).toLocaleDateString('en-BD')}</span>}
                         <span className="text-xs text-white/25 ml-auto">{timeAgo(app.created_at)}</span>
@@ -379,7 +390,7 @@ export default function ModelDashboard() {
                         <div className="font-bold text-base mb-1">{job?.title}</div>
                         <div className="text-sm text-white/40">{job?.agency_profiles?.agency_name} · {job?.location}</div>
                         <div className="flex gap-2 mt-2 flex-wrap">
-                          <span className="text-xs text-[#c9a84c] bg-[#c9a84c]/10 border border-[#c9a84c]/20 px-2.5 py-0.5 rounded-full">{formatTaka(job?.pay)}</span>
+                          <span className="text-xs text-[#c9a84c] bg-[#c9a84c]/10 border border-[#c9a84c]/20 px-2.5 py-0.5 rounded-full">{job?.pay_amount ? formatBDT(job.pay_amount) : job?.pay_display || 'Negotiable'}</span>
                           <span className="text-xs text-white/40">{job?.type}</span>
                         </div>
                       </div>

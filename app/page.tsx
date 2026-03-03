@@ -154,7 +154,7 @@ export default async function HomePage() {
       {/* ─── FOOTER ────────────────────────── */}
       <footer className="border-t border-white/6 bg-white/[0.02] px-6 md:px-14 py-10 flex flex-wrap items-center justify-between gap-5">
         <div className="font-playfair text-xl font-bold">The Artist <span className="text-[#c9a84c]">Portal</span> <span className="text-xs font-normal text-white/20">Bangladesh</span></div>
-        <p className="text-xs text-white/25">© 2025 The Artist Portal. All rights reserved.</p>
+        <p className="text-xs text-white/25">© 2026 The Artist Portal. All rights reserved.</p>
         <div className="flex gap-5 text-xs text-white/30">
           <span className="hover:text-white/60 cursor-pointer transition-colors">Privacy</span>
           <span className="hover:text-white/60 cursor-pointer transition-colors">Terms</span>

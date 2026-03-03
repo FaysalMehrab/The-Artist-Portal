@@ -310,7 +310,7 @@ export default function AgencyDashboard() {
                         <div className="font-bold text-base mb-1">{job.title}</div>
                         <div className="flex gap-3 flex-wrap text-xs text-white/35">
                           <span>📍 {job.location}</span>
-                          <span>💰 {job.pay_amount ? formatBDT((job as any).pay_amount) : (job as any).pay_display || 'Negotiable'}</span>
+                          <span>💰 {(job as any).pay_amount ? formatBDT((job as any).pay_amount) : (job as any).pay_display || 'Negotiable'}</span>
                           {job.shoot_date && <span>📅 {new Date(job.shoot_date).toLocaleDateString('en-BD')}</span>}
                           <span>{timeAgo(job.created_at)}</span>
                         </div>
@@ -371,7 +371,13 @@ export default function AgencyDashboard() {
                         <div key={app.id} className="bg-white/[0.03] border border-white/8 rounded-2xl p-6">
                           <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
                             <div>
-                              <div className="font-bold text-base mb-0.5">{model?.name}</div>
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <span className="font-bold text-base">{model?.name}</span>
+                                <a href={`/profile/model/${app.model_id}`} target="_blank"
+                                  className="text-[10px] font-bold text-[#c9a84c] border border-[#c9a84c]/30 bg-[#c9a84c]/8 px-2.5 py-0.5 rounded-full hover:bg-[#c9a84c] hover:text-black transition-all">
+                                  👁 View Full Profile
+                                </a>
+                              </div>
                               <div className="flex flex-wrap gap-2 mt-1 text-xs text-white/40">
                                 {model?.age && <span>🎂 {model.age} yrs</span>}
                                 {model?.city && <span>📍 {model.city}</span>}
@@ -427,17 +433,19 @@ export default function AgencyDashboard() {
             {/* Logo upload */}
             <div className="flex flex-col items-center gap-1">
               <p className="text-[11px] tracking-[2px] uppercase font-bold text-[#c9a84c] mb-2 self-start">Agency Logo</p>
+              {user && (
               <PhotoUpload
-                userId={user!.id}
+                userId={user.id}
                 currentUrl={agencyProfile?.logo_url || null}
                 bucket="avatars"
                 shape="square"
                 label="Upload Logo"
                 onUpload={async (url) => {
-                  await supabase.from('agency_profiles').update({ logo_url: url }).eq('id', user!.id)
+                  await supabase.from('agency_profiles').update({ logo_url: url }).eq('id', user.id)
                   await refreshProfile()
                 }}
               />
+              )}
             </div>
             <div className="border-t border-white/6 pt-4">
             <p className="text-[11px] tracking-[2px] uppercase font-bold text-[#c9a84c]">Agency Information</p>

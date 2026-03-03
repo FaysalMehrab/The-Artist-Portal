@@ -4,11 +4,17 @@ import AgencyProfileClient from './AgencyProfileClient'
 
 export const revalidate = 0
 
-export default async function AgencyProfilePage({ params }: { params: { id: string } }) {
+export default async function AgencyProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+
   const { data: agency } = await supabase
     .from('agency_profiles')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!agency) notFound()
@@ -16,7 +22,7 @@ export default async function AgencyProfilePage({ params }: { params: { id: stri
   const { data: jobs } = await supabase
     .from('jobs')
     .select('*')
-    .eq('agency_id', params.id)
+    .eq('agency_id', id)
     .eq('is_open', true)
     .order('created_at', { ascending: false })
     .limit(10)
